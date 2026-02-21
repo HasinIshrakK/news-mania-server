@@ -13,23 +13,28 @@ let db;
 let articlesCollection;
 
 async function connectDB() {
-  try {
-    await client.connect();
-    db = client.db("newsDB");
-    articlesCollection = db.collection("articles");
+    try {
+        await client.connect();
+        db = client.db("newsDB");
+        articlesCollection = db.collection("articles");
 
-    console.log("MongoDB Connected");
-  } catch (err) {
-    console.error("DB Connection Error:", err.message);
-  }
+        await articlesCollection.createIndex(
+            { article_id: 1 },
+            { unique: true }
+        );
+
+        console.log("MongoDB Connected");
+    } catch (err) {
+        console.error("DB Connection Error:", err.message);
+    }
 }
 
 connectDB();
 
 app.get("/", (req, res) => {
-  res.send("Server running");
+    res.send("Server running");
 });
 
 app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
+    console.log(`Server running on port ${process.env.PORT}`);
 });
