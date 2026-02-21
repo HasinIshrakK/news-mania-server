@@ -80,6 +80,65 @@ app.get("/", (req, res) => {
     res.send("Server running");
 });
 
+app.get("/api/news", async (req, res) => {
+    try {
+        const {
+            startDate,
+            endDate,
+            author,
+            language,
+            country,
+            category,
+            contentType
+        } = req.query;
+
+        let query = {};
+
+        // Date range filter
+        if (startDate && endDate) {
+            query.pubDate = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate)
+            };
+        }
+
+        // Author / creator filter
+        if (author) {
+            query.creator = { $in: [author] };
+        }
+
+        // Language filter
+        if (language) {
+            query.language = language;
+        }
+
+        // Country filter
+        if (country) {
+            query.country = { $in: [country] };
+        }
+
+        // Category filter (multi-select)
+        if (category) {
+            query.category = { $all: category.split(",") };
+        }
+
+        // Content type filter
+        if (contentType) {
+            query.content_type = contentType;
+        }
+
+        const news = await articlesCollection
+            .find(query)
+            .sort({ pubDate: -1 })
+            .toArray();
+
+        res.json(news);
+    } catch (err) {
+        console.error("Filter Error:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
