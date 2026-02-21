@@ -3,6 +3,7 @@ const express = require("express");
 const { MongoClient } = require("mongodb");
 const cors = require("cors");
 const axios = require("axios");
+const cron = require("node-cron");
 
 const app = express();
 app.use(cors());
@@ -68,6 +69,12 @@ async function fetchNews() {
         console.error("Ingestion Error:", err.response?.data || err.message);
     }
 }
+
+// Scheduling fetchNews to run every 6 hours
+cron.schedule("0 */6 * * *", async () => {
+    console.log("Running scheduled news ingestion...");
+    await fetchNews();
+});
 
 app.get("/", (req, res) => {
     res.send("Server running");
