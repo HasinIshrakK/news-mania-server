@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 const cors = require("cors");
 const axios = require("axios");
 const cron = require("node-cron");
@@ -135,6 +135,23 @@ app.get("/api/news", async (req, res) => {
         res.json(news);
     } catch (err) {
         console.error("Filter Error:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get("/api/news/:id", async (req, res) => {
+    try {
+        const article = await articlesCollection.findOne({
+            _id: new ObjectId(req.params.id)
+        });
+
+        if (!article) {
+            return res.status(404).json({ error: "Article not found" });
+        }
+
+        res.json(article);
+    } catch (err) {
+        console.error("Single Article Error:", err.message);
         res.status(500).json({ error: err.message });
     }
 });
